@@ -30,31 +30,41 @@ import matplotlib.pyplot as plt
 
 
 def run(args: argparse.Namespace) -> None:
-    metrics: np.ndarray = np.load(args.metric_file)
-    match metrics.ndim:
+    baseline_metrics: np.ndarray = np.load(args.baseline_metric_file)
+    experiment_metrics: np.ndarray = np.load(args.experiment_metric_file)
+
+    match baseline_metrics.ndim:
         case 2:
-            E, N = metrics.shape
+            E, N = baseline_metrics.shape
             K = 1
         case 3:
-            E, N, K = metrics.shape
+            E, N, K = baseline_metrics.shape
 
     fig = plt.figure()
     ax = fig.gca()
-    ax.set_title(str(args.metric_file))
+    ax.set_title("Baseline vs Experiment")
 
     epcs = np.arange(E)
 
     class_names = ["background", "esophagus", "heart", "trachea", "aorta"]
 
+    # Plot baseline metrics with faint color
     for k in range(1, K):
-        y = metrics[:, :, k].mean(axis=1)
-        ax.plot(epcs, y, label=class_names[k], linewidth=1.5)
+        y = baseline_metrics[:, :, k].mean(axis=1)
+        ax.plot(epcs, y, label=f"Baseline {class_names[k]}", linewidth=1.5, linestyle='--', alpha=0.3)
+
+    # Plot experiment metrics with prominent color
+    for k in range(1, K):
+        y = experiment_metrics[:, :, k].mean(axis=1)
+        ax.plot(epcs, y, label=f"Experiment {class_names[k]}", linewidth=1.5)
 
     if K > 2:
-        ax.plot(epcs, metrics.mean(axis=1).mean(axis=1), label="All classes", linewidth=3)
+        ax.plot(epcs, baseline_metrics.mean(axis=1).mean(axis=1), label="Baseline All classes", linewidth=3, linestyle='--', alpha=0.3)
+        ax.plot(epcs, experiment_metrics.mean(axis=1).mean(axis=1), label="Experiment All classes", linewidth=3)
         ax.legend()
     else:
-        ax.plot(epcs, metrics.mean(axis=1), linewidth=3)
+        ax.plot(epcs, baseline_metrics.mean(axis=1), linewidth=3, linestyle='--', alpha=0.3)
+        ax.plot(epcs, experiment_metrics.mean(axis=1), linewidth=3)
 
     fig.tight_layout()
     if args.dest:
@@ -65,9 +75,11 @@ def run(args: argparse.Namespace) -> None:
 
 
 def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Plot data over time')
-    parser.add_argument('--metric_file', type=Path, required=True, metavar="METRIC_MODE.npy",
-                        help="The metric file to plot.")
+    parser = argparse.ArgumentParser(description='Plot baseline vs experiment data over time')
+    parser.add_argument('--baseline_metric_file', type=Path, required=True, metavar="BASELINE_METRIC.npy",
+                        help="The baseline metric file to plot.")
+    parser.add_argument('--experiment_metric_file', type=Path, required=True, metavar="EXPERIMENT_METRIC.npy",
+                        help="The experiment metric file to plot.")
     parser.add_argument('--dest', type=Path, metavar="METRIC_MODE.png",
                         help="Optional: save the plot to a .png file")
     parser.add_argument("--headless", action="store_true",

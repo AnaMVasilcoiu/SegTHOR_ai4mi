@@ -103,7 +103,8 @@ Post-processing is done while stitching the slices together to form the 3D volum
 * Structure size can also be changed, minimum size is 1.
 
 ### 6. Evaluation
-instructions
+To evaluate the results in 3d, first utilize the stitch.py script to convert the predictions back into 3D volumes. 
+Then to get the values for the metrics run the 3DMetrics notebook and make sure that the the pred_folder is equal to the folder of the stitched back volumes and the gt_folder refers to the folder containing the ground truths.
 
 ## Test
 How to run model inference with test_predictions.py

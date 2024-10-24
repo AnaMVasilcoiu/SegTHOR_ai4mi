@@ -13,6 +13,10 @@ from ShallowNet import shallowCNN
 from ENet import ENet
 import nibabel as nib
 from PIL import Image
+from torchvision.transforms import InterpolationMode
+from ENet_kernelsize import kernel_ENet
+from utils import ( class2one_hot)
+from operator import itemgetter
 from tqdm import tqdm
 
 datasets_params: dict[str, dict[str, Any]] = {}
@@ -49,7 +53,10 @@ def save_3d_predictions_as_nii(predictions_3d, output_path, affine=np.eye(4)):
 
 def run_inference_on_test(args):
     # Load the trained model checkpoint
-    net = torch.load(args.model_checkpoint)
+
+    net = kernel_ENet(1,5, kernels=25,kernel_size=3)
+
+    net.load_state_dict(torch.load(args.model_checkpoint))
     net.eval()
 
     # Pick device
@@ -57,7 +64,7 @@ def run_inference_on_test(args):
     net.to(device)
 
     # Dataset paths
-    root_dir = Path("data") / args.dataset
+    root_dir = Path("data") / "SEGTHOR_test"
 
     # Prepare data loader
     img_transform = transforms.Compose([
@@ -67,10 +74,24 @@ def run_inference_on_test(args):
         lambda nd: nd / 255,  # Normalize the image
         lambda nd: torch.tensor(nd, dtype=torch.float32)  # Convert to tensor
     ])
-
+    K = 5
+    gt_transform = transforms.Compose([
+        transforms.Resize((256, 256), interpolation=InterpolationMode.NEAREST),
+        # Resize ground truth with NEAREST interpolation,
+        lambda img: np.array(img)[...],  # Convert to numpy array
+        # The idea is that the classes are mapped to {0, 255} for binary cases
+        # {0, 85, 170, 255} for 4 classes
+        # {0, 51, 102, 153, 204, 255} for 6 classes
+        # Very sketchy but that works here and that simplifies visualization
+        lambda nd: nd / (255 / (K - 1)) if K != 5 else nd / 63,  # max <= 1 # Normalize the image
+        lambda nd: torch.tensor(nd, dtype=torch.int64)[None, ...],  # Add one dimension to simulate batch
+        lambda t: class2one_hot(t, K=K),  # Convert to one-hot encoding
+        itemgetter(0)
+    ])
     test_set = SliceDataset('test',
                             root_dir,
                             img_transform=img_transform,
+                            gt_transform=gt_transform,
                             debug=False)
     test_loader = DataLoader(test_set, batch_size=1, shuffle=False, num_workers=args.num_workers, collate_fn=custom_collate)
 

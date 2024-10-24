@@ -8,3 +8,7 @@ bin/
 __pycache__/
 grad_figs/*.png
 jobs/outputs/*
+/baseline_best_epoch
+/best_model_best_epoch
+/test_preds/predictions_2d
+/test_preds/predictions_2d_final

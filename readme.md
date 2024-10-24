@@ -77,6 +77,12 @@ python -O main.py \
     --transformation preprocess_augment
 ```
 
+### 4. Losses
+We support 6 losses with Enet. 
+* Cross entropy is the default option and can be specified with '--loss ce` while running main. 
+* Jaccard (IoU) `--loss jaccard`, Dice `'--loss dice` , Lovasz-softmax `'--loss lovasz`
+* Custom `'--loss custom`, Focal `'--loss focal`
+
 ### 4. Loss functions
 * Specify the loss function: `--loss` (default is `ce`), you can choose from `ce, jaccard, dice, lovasz, custom, focal`.
 * When using focal loss, specify gamma value: `--focal_loss_gamma` (default is `2.0`)
@@ -95,11 +101,15 @@ python -O main.py \
     --focal_loss_weights 1.0 5.0 1.0 1.0 1.0
 ```
 
-### 4. Post processing
-Instructions 
+### 5. Post-processing
+Post-processing is done while stitching the slices together to form the 3D volume. 
+* It can be enabled with `'--post_processing` argument while running stitch.py.
+* Morphological post-processing can be changed by modifying line 73 in stitch.py
+* The operation can be set to ['dilation','erosion','opening','closing'].
+* Structure size can also be changed, minimum size is 1.
 
-### 5. Evaluation
-Instructions
+### 6. Evaluation
+instructions
 
 ## Test
 How to run model inference with test_predictions.py

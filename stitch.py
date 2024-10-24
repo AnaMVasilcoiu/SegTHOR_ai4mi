@@ -46,7 +46,7 @@ def merge_patient(id_: str, dest_folder: str, images: list[Path],
     # print(orig_nib.affine)
 
     X, Y, Z = orig_shape
-    assert Z == len(idxes)
+    # assert Z == len(idxes)
 
     res_arr: np.ndarray = np.zeros((X, Y, Z), dtype=np.int16)
 

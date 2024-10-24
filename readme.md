@@ -77,12 +77,6 @@ python -O main.py \
     --transformation preprocess_augment
 ```
 
-### 4. Losses
-We support 6 losses with Enet. 
-* Cross entropy is the default option and can be specified with '--loss ce` while running main. 
-* Jaccard (IoU) `--loss jaccard`, Dice `'--loss dice` , Lovasz-softmax `'--loss lovasz`
-* Custom `'--loss custom`, Focal `'--loss focal`
-
 ### 4. Loss functions
 * Specify the loss function: `--loss` (default is `ce`), you can choose from `ce, jaccard, dice, lovasz, custom, focal`.
 * When using focal loss, specify gamma value: `--focal_loss_gamma` (default is `2.0`)
